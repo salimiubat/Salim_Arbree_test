@@ -25,7 +25,7 @@ export default function LoginPage() {
 			setLoading(true);
 			const response = await baseURL.post('/token/', user);
 			
-			const token = response.data.token;
+			const token = response.data.access;
 	
 			localStorage.setItem('token', token);
 	

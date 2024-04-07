@@ -1,10 +1,11 @@
 
 from rest_framework import viewsets, status
-from .models import BlogPost, Comment
+from .models import *
 from .serializer import *
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -18,8 +19,11 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     serializer_class = BlogPostSerializer
     permission_classes = [IsAuthenticated]
 
+    
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

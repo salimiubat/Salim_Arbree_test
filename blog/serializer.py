@@ -31,12 +31,19 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['content', 'author_username', 'creation_date']
+        fields = ['content','blog_post', 'author_username', 'creation_date']
 
 class BlogPostSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True, source='comment_set')
+    owner = serializers.SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = '__all__'
-        read_only_fields = ['author']
+        read_only_fields = ['owner','author']
+    
+    def get_owner(self, obj):
+        request = self.context.get('request', None)
+        if request and request.user == obj.author:
+            return True
+        return False

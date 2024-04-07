@@ -10,91 +10,118 @@ function MyBlog() {
   const [blogPosts, setBlogPosts] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '' });
+  const [selectedPost, setSelectedPost] = useState(null);
+
+const fetchBlogPosts = () => {
+  baseURL.get('/blogposts/')
+    .then(response => {
+      console.log('Fetched blog posts:', response.data);
+      const filteredPosts = response.data.results.filter(post => post.owner);
+      setBlogPosts(filteredPosts);
+    })
+    .catch(error => {
+      console.error('Error fetching blog posts:', error);
+    });
+};
+
   useEffect(() => {
-    baseURL.get('/blogposts/')
-      .then(response => {
-        console.log('Fetched blog posts:', response.data);
-        setBlogPosts(response.data.results);     })
-      .catch(error => {
-        console.error('Error fetching blog posts:', error);
-      });
+    fetchBlogPosts();
   }, []);
 
   const handleCreate = () => {
+    setSelectedPost(null);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+    setSelectedPost(null);
+    setNewPost({ title: '', content: '' }); 
   };
-
+  
   const handleSave = () => {
-    console.log('New post:', newPost);
-    baseURL.post('/blogposts/', newPost)
-      .then(response => {
-        console.log('New blog post created:', response.data);
-        setBlogPosts([...blogPosts, response.data]);
-        setNewPost({ title: '', content: '' });
-        setOpenDialog(false);
-      })
-      .catch(error => {
-        console.error('Error creating blog post:', error);
-      });
+    if (selectedPost) {
+      console.log('Updated post:', newPost);
+      baseURL.put(`/blogposts/${selectedPost.id}/`, newPost)
+        .then(response => {
+          console.log('Blog post updated:', response.data);
+          const updatedPosts = blogPosts.map(post =>
+            post.id === response.data.id ? response.data : post
+          );
+          setBlogPosts(updatedPosts);
+          setOpenDialog(false);
+          setSelectedPost(null); 
+          setNewPost({ title: '', content: '' }); 
+        })
+        .catch(error => {
+          console.error('Error updating blog post:', error);
+        });
+    } else {
+      baseURL.post('/blogposts/', newPost)
+        .then(response => {
+          console.log('New blog post created:', response.data);
+          setBlogPosts([...blogPosts, response.data]);
+          setOpenDialog(false);
+          setSelectedPost(null); 
+          setNewPost({ title: '', content: '' }); 
+        })
+        .catch(error => {
+          console.error('Error creating blog post:', error);
+        });
+    }
   };
 
   const handleUpdate = (id) => {
-    console.log('Handle update operation for blog post with ID:', id);
+    const postToUpdate = blogPosts.find(post => post.id === id);
+    setSelectedPost(postToUpdate);
+    setNewPost({ title: postToUpdate.title, content: postToUpdate.content });
+    setOpenDialog(true); 
   };
-
+  
   const handleDelete = (id) => {
     baseURL.delete(`/blogposts/${id}`)
-        .then(response => {
-            setBlogPosts(blogPosts.filter(post => post.id !== id));
-        })
-        .catch(error => {
-            console.error('Error deleting blog post:', error);
-        });
-};
-
-
+      .then(response => {
+        setBlogPosts(blogPosts.filter(post => post.id !== id));
+      })
+      .catch(error => {
+        console.error('Error deleting blog post:', error);
+      });
+  };
 
   return (
     <div style={{ height: "auto", margin:"auto",padding:"10 px" }} className='container-fluid'>
       <ProfilePage/>
       <div style={ {height: 400, width: '70%', margin:"auto"} }>
-      <Button variant="contained" onClick={handleCreate} style={{margin:"10px"}}>Create</Button>
+        <Button variant="contained" onClick={handleCreate} style={{margin:"10px"}}>Create</Button>
 
-<DataGrid
-  rows={blogPosts}
-  columns={[
-    { field: 'title', headerName: 'Title', width: 150 },
-    { field: 'content', headerName: 'Content', width: 300 },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 400,
-      renderCell: (params) => (
-        <>
-          {params.row.owner && ( 
-            <>
-              <Button variant="contained" color="secondary" onClick={() => handleUpdate(params.row.id)} style={{marginRight:"2px"}}>Update</Button>
-
-              <Button variant="contained" color="error" onClick={() => handleDelete(params.row.id)}>Delete</Button>
-
-            </>
-          )}
-        </>
-      ),
-    },
-  ]}
-  pageSize={5}
-  rowsPerPageOptions={[5, 10, 20]}
-/>
+        <DataGrid
+          rows={blogPosts}
+          columns={[
+            { field: 'title', headerName: 'Title', width: 150 },
+            { field: 'content', headerName: 'Content', width: 300 },
+            {
+              field: 'actions',
+              headerName: 'Actions',
+              width: 400,
+              renderCell: (params) => (
+                <>
+                  {params.row.owner && ( 
+                    <>
+                      <Button variant="contained" color="secondary" onClick={() => handleUpdate(params.row.id)} style={{marginRight:"2px"}}>Update</Button>
+                      <Button variant="contained" color="error" onClick={() => handleDelete(params.row.id)}>Delete</Button>
+                    </>
+                  )}
+                </>
+              ),
+            },
+          ]}
+          pageSize={5}
+          rowsPerPageOptions={[5, 10, 20]}
+        />
       </div>
      
-
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Create New Blog Post</DialogTitle>
+        <DialogTitle>{selectedPost ? 'Edit Blog Post' : 'Create New Blog Post'}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -116,7 +143,7 @@ function MyBlog() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">Cancel</Button>
-          <Button onClick={handleSave} color="primary">Save</Button>
+          <Button onClick={handleSave} color="primary">{selectedPost ? 'Update' : 'Save'}</Button>
         </DialogActions>
       </Dialog>
     </div>

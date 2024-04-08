@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: gunicorn your_project.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=mysql://sql6697248:f3fnZ8aDGy@sql6.freemysqlhosting.net:3306/sql6697248
+      - REDIS_URL=redis://redis:6379/0
+    restart: always
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: f3fnZ8aDGy
+      MYSQL_DATABASE: sql6697248
+      MYSQL_USER: sql6697248
+      MYSQL_PASSWORD: f3fnZ8aDGy
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:latest
+
+volumes:
+  mysql_data:

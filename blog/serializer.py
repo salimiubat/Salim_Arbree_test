@@ -28,10 +28,24 @@ class UserSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author_username = serializers.ReadOnlyField(source='author.username')
+    owner = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ['content','blog_post', 'author_username', 'creation_date']
+        fields = ["id",'content', 'author_username', 'creation_date', 'owner']
+        # read_only_fields = ['owner','blog_post']
+        read_only_fields = ['owner']
+        extra_kwargs = {
+            'blog_post': {'required': True}  # Ensure blog_post is required for creation
+        }
+
+    def get_owner(self, obj):
+        request = self.context.get('request', None)
+        if request and request.user == obj.author:
+            return True
+        return False
+    
+
 
 class BlogPostSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True, source='comment_set')

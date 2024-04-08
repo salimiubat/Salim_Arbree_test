@@ -15,7 +15,6 @@ function MyBlog() {
 const fetchBlogPosts = () => {
   baseURL.get('/blogposts/')
     .then(response => {
-      console.log('Fetched blog posts:', response.data);
       const filteredPosts = response.data.results.filter(post => post.owner);
       setBlogPosts(filteredPosts);
     })
@@ -41,10 +40,8 @@ const fetchBlogPosts = () => {
   
   const handleSave = () => {
     if (selectedPost) {
-      console.log('Updated post:', newPost);
       baseURL.put(`/blogposts/${selectedPost.id}/`, newPost)
         .then(response => {
-          console.log('Blog post updated:', response.data);
           const updatedPosts = blogPosts.map(post =>
             post.id === response.data.id ? response.data : post
           );
@@ -59,7 +56,6 @@ const fetchBlogPosts = () => {
     } else {
       baseURL.post('/blogposts/', newPost)
         .then(response => {
-          console.log('New blog post created:', response.data);
           setBlogPosts([...blogPosts, response.data]);
           setOpenDialog(false);
           setSelectedPost(null); 
@@ -88,11 +84,72 @@ const fetchBlogPosts = () => {
       });
   };
 
-  return (
-    <div style={{ height: "auto", margin:"auto",padding:"10 px" }} className='container-fluid'>
+//   return (
+//     <div style={{ height: "auto", margin:"auto",padding:"10 px" }} className='container-fluid'>
+//       <ProfilePage/>
+//       <div style={ {height: 400, width: '70%', margin:"auto"} }>
+//         <Button variant="contained" onClick={handleCreate} style={{margin:"10px"}}>Create</Button>
+
+//         <DataGrid
+//           rows={blogPosts}
+//           columns={[
+//             { field: 'title', headerName: 'Title', width: 150 },
+//             { field: 'content', headerName: 'Content', width: 300 },
+//             {
+//               field: 'actions',
+//               headerName: 'Actions',
+//               width: 400,
+//               renderCell: (params) => (
+//                 <>
+//                   {params.row.owner && ( 
+//                     <>
+//                       <Button variant="contained" color="secondary" onClick={() => handleUpdate(params.row.id)} style={{marginRight:"2px"}}>Update</Button>
+//                       <Button variant="contained" color="error" onClick={() => handleDelete(params.row.id)}>Delete</Button>
+//                     </>
+//                   )}
+//                 </>
+//               ),
+//             },
+//           ]}
+//           pageSize={5}
+//           rowsPerPageOptions={[5, 10, 20]}
+//         />
+//       </div>
+     
+//       <Dialog open={openDialog} onClose={handleCloseDialog}>
+//         <DialogTitle>{selectedPost ? 'Edit Blog Post' : 'Create New Blog Post'}</DialogTitle>
+//         <DialogContent>
+//           <TextField
+//             autoFocus
+//             margin="dense"
+//             label="Title"
+//             fullWidth
+//             value={newPost.title}
+//             onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+//           />
+//           <TextField
+//             margin="dense"
+//             label="Content"
+//             fullWidth
+//             multiline
+//             rows={4}
+//             value={newPost.content}
+//             onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+//           />
+//         </DialogContent>
+//         <DialogActions>
+//           <Button onClick={handleCloseDialog} color="primary">Cancel</Button>
+//           <Button onClick={handleSave} color="primary">{selectedPost ? 'Update' : 'Save'}</Button>
+//         </DialogActions>
+//       </Dialog>
+//     </div>
+//   );
+// }
+ return (
+    <div style={{ height: "auto", margin:"auto", padding:"10px" }} className='container-fluid'>
       <ProfilePage/>
-      <div style={ {height: 400, width: '70%', margin:"auto"} }>
-        <Button variant="contained" onClick={handleCreate} style={{margin:"10px"}}>Create</Button>
+      <div style={{ height: 400, width: '70%', margin:"auto" }}>
+        <Button variant="contained" onClick={handleCreate} style={{ margin:"10px" }}>Create</Button>
 
         <DataGrid
           rows={blogPosts}
@@ -107,7 +164,7 @@ const fetchBlogPosts = () => {
                 <>
                   {params.row.owner && ( 
                     <>
-                      <Button variant="contained" color="secondary" onClick={() => handleUpdate(params.row.id)} style={{marginRight:"2px"}}>Update</Button>
+                      <Button variant="contained" color="secondary" onClick={() => handleUpdate(params.row.id)} style={{ marginRight:"2px" }}>Update</Button>
                       <Button variant="contained" color="error" onClick={() => handleDelete(params.row.id)}>Delete</Button>
                     </>
                   )}

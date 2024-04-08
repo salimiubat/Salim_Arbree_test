@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { FaAngleLeft } from 'react-icons/fa6';
+
 import baseURL from '../apiConfig';
 
 export default function LoginPage() {
@@ -31,8 +30,10 @@ export default function LoginPage() {
 	
 			console.log('Login successful');
 			
-			router.push('/profile');
+			router.push('/blog');
 		} catch (error) {
+			window.alert('Login failed. Please check your credentials and try again.');
+
 			console.log('Login failed', error.message);
 		} finally {
 			setLoading(false);

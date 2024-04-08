@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework import permissions
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -13,14 +14,16 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def current_user(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
 class BlogPostViewSet(viewsets.ModelViewSet):
     queryset = BlogPost.objects.all()
     serializer_class = BlogPostSerializer
     permission_classes = [IsAuthenticated]
-
     
-
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -45,8 +48,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # serializer.save(author=self.request.user)
-        # def perform_create(self, serializer):
+        
         serializer.save(author=self.request.user, blog_post_id=self.request.data.get('blog_post'))
 
 

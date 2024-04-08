@@ -10,6 +10,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
     
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password']
@@ -36,7 +37,7 @@ class CommentSerializer(serializers.ModelSerializer):
         # read_only_fields = ['owner','blog_post']
         read_only_fields = ['owner']
         extra_kwargs = {
-            'blog_post': {'required': True}  # Ensure blog_post is required for creation
+            'blog_post': {'required': True}  
         }
 
     def get_owner(self, obj):
